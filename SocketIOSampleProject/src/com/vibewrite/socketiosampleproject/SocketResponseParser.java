@@ -5,8 +5,8 @@ import java.util.Hashtable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.hardware.Camera.Size;
 import android.util.Log;
+import com.vibewrite.socketiosampleproject.EnumerationList.*;
 
 
 
@@ -14,18 +14,6 @@ import android.util.Log;
 public class SocketResponseParser
 {
 	
-private enum CommandTypeEnum {vibrate, led, handwritingsettings};
-private enum CommandEnum {command, params};
-	 
-private enum VibrateEnum {duration, repeat};
-private enum LedEnum {color, duration};
-private enum HandWritingSettingsEnum {key, value};
-private enum AvailableHandWritingEnum {dictionary, writer};
- 
-private enum EventEnum {letter, word, sensordata, disconnect, idle, gesture};
-private enum LetterNormalEnum {eventname, word, spelling_mistake, word_end};
-private enum LetterAdvancedEnum {eventname, word, word_current, letter, true_letter, spelling_mistake, word_end};
-
 public static Hashtable<String, Object> letterHashObj;
 	 
 
