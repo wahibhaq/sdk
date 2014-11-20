@@ -67,7 +67,6 @@ public class TestSocketActivity extends Activity {
   textLog = (TextView)findViewById(R.id.log);
   textOutput = (TextView) findViewById(R.id.output);
   
-  Toast.makeText(getApplicationContext(), "This is Simulator !!", Toast.LENGTH_LONG).show();
 
   checkWifiavailability();
   
