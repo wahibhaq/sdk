@@ -36,7 +36,7 @@ public class SocketIOLayer implements IOCallback{
 	 
 	 static boolean isConnected = false;
 	 static boolean isLoggedIn = false;
-	 final String devKey = "<insert dev key here>";
+	 final String devKey = "3e869907-36cc-492f-a71b-e551fa5e0157";
 
 	 //Subscription Parameters
 	 static boolean isLetterModeAdvance = false;
