@@ -14,6 +14,9 @@ import java.util.Hashtable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.vibewrite.socketiosampleproject.EnumerationList.*;
+
+
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +36,13 @@ public class SocketIOLayer implements IOCallback{
 	 
 	 static boolean isConnected = false;
 	 static boolean isLoggedIn = false;
+	 final String devKey = "3e869907-36cc-492f-a71b-e551fa5e0157";
+
+	 //Subscription Parameters
 	 static boolean isLetterModeAdvance = false;
+	 static boolean isTriggerTyping = false;
+	 static String eventName = "";
+	 static String subscriptionParams[] = null;
 	 
 	 Context appContext;
 	 
@@ -172,7 +181,13 @@ public class SocketIOLayer implements IOCallback{
 	}
 
 	
-	//Custom Methods//
+	/**
+	 * Function to Connect with simulator/pen
+	 * 
+	 * @param ipaddress
+	 * @param port
+	 * @param subdomain
+	 */
 	public void initiateConnection(String ipaddress, String port, String subdomain)
 	{
 
@@ -215,7 +230,8 @@ public void initiateLogin()
     try {
     	
 		jsonArgs.putOpt("type", "mobile");
-		jsonArgs.putOpt("key", ""); //Insert key here e.g _guid_7Bvueydh75a4egul4cwAbc-8H5HNUS9YiwxeHxc676hg
+		jsonArgs.putOpt("key", devKey); //Insert key in this devKey variable
+
 		
 	} catch (JSONException e) {
 		// TODO Auto-generated catch block
@@ -235,16 +251,29 @@ public void initiateLogin()
             
             isLoggedIn = true;
 			Log.i("socket","SocketIOLayer login is successful !!");
+			
+			/*
+			 * Initiate subscription here if you want it to be handled automatically
+			 */
+			//initiateSubscription(eventName, subscriptionParams);
+
 
 
 		}
   }, jsonArgs);
 }
 
+
+public void setSubscriptionParameters(String eName, String params[])
+{
+	eventName = eName;
+	subscriptionParams = params;
+}
+
 /**
  * This is to subscribe to listen to events sent from pen e.g letter, word etc but for normal mode
  */
-public void initiateSubscription(String eventName, String[] params)
+public void initiateSubscription()
 {
 	if( eventName.isEmpty() == false)
 	{
@@ -253,7 +282,7 @@ public void initiateSubscription(String eventName, String[] params)
 			case "letter":
 				displayLogsOnScreen("Initiation Subscription : For " + eventName + " Event" );
 				
-				if(params == null)
+				if(subscriptionParams == null)
 				{
 					//Letter Mode is Normal
 					isLetterModeAdvance = false;
@@ -263,7 +292,7 @@ public void initiateSubscription(String eventName, String[] params)
 				{
 					//Letter Mode is Advanced
 					isLetterModeAdvance = true;
-					handleLetterSubscription(params);
+					handleLetterSubscription(subscriptionParams);
 				}
 				
 				break;
@@ -271,10 +300,10 @@ public void initiateSubscription(String eventName, String[] params)
 			case "sensordata":
 				displayLogsOnScreen("Initiation Subscription : For " + eventName + " Event" );
 				
-				if(params == null)
+				if(subscriptionParams == null)
 					handleSensorSubscription(null);
 				else
-					handleSensorSubscription(params);
+					handleSensorSubscription(subscriptionParams);
 					
 				break;
 		}
@@ -310,13 +339,22 @@ public void handleLetterSubscription(String params[])
 	}
 	else if( params.length > 0)
 	{
+		if(Boolean.valueOf(params[0]))
+			isTriggerTyping = true;
+		else 
+			isTriggerTyping = false;
 		
+		if(Boolean.valueOf(params[1]))
+			isLetterModeAdvance = true;
+		else
+			isLetterModeAdvance = false;
+
 		JSONObject jsonParams = new JSONObject();
 	    
 	    try {
 	    	
-	    	jsonParams.putOpt("trigger_typing", Boolean.valueOf(params[0]));
-			jsonParams.putOpt("advanced_mode", Boolean.valueOf(params[1]));
+	    	jsonParams.putOpt(LetterSubParams.trigger_typing.toString(), isTriggerTyping); //Boolean.valueOf(params[0]));
+			jsonParams.putOpt(LetterSubParams.advanced_mode.toString(), isLetterModeAdvance); //Boolean.valueOf(params[1]));
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -616,16 +654,29 @@ private void handleLetterResponse(Object[] response)
         jo = new JSONObject(parameters[0].toString());
 		Log.i("socket", "SocketIOLayer Server said: " + jo.toString() );
 		
-		if(isLetterModeAdvance == false)
+		if(isLetterModeAdvance == true)
 		{
-			responseList.add("Advanced");
+			responseList.add(LetterSubParamsMode.Advanced.toString());
+			
+			if(isTriggerTyping)
+				responseList.add(LetterSubParamsTyping.AfterEachLetter.toString());
+			else
+				responseList.add(LetterSubParamsTyping.AfterEachWord.toString());
+			
 			responseList.add(jo.toString());
+			
 			sendResponseBackToActivity(responseList);
 						
 		}
 		else
 		{
-			responseList.add("Normal");
+			responseList.add(LetterSubParamsMode.Normal.toString());
+			
+			if(isTriggerTyping)
+				responseList.add(LetterSubParamsTyping.AfterEachLetter.toString());
+			else
+				responseList.add(LetterSubParamsTyping.AfterEachWord.toString());
+			
 			responseList.add(jo.toString());
 			sendResponseBackToActivity(responseList);
 			

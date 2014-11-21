@@ -1,9 +1,13 @@
 package com.vibewrite.socketiosampleproject;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.vibewrite.socketiosampleproject.EnumerationList.*;
+
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,6 +38,12 @@ public class TestSocketActivity extends Activity {
  private SocketResponseParser parserObj;
  
  boolean isConnected = false;
+
+ final String targetMode = "/sim";
+ String ip = "update.vibewrite.eu";//"172.17.3.139"; //Simulator or Pen ip
+ String port = "8000"; //Simulator/Pen port
+ final String triggerTyping = "true";
+ final String advancedMode = "true";
 
  Handler resultHandler;
  
@@ -70,6 +80,7 @@ public class TestSocketActivity extends Activity {
 
   checkWifiavailability();
   
+
   resultHandler = new HandlerExtension(this);
   parserObj = new SocketResponseParser();
 
@@ -90,18 +101,13 @@ public class TestSocketActivity extends Activity {
 	   @Override
 	   public void onClick(View v) 
 	   {
+		   //Example how to initiate subscription for "letter" event 
+		   String subscriptionParams[] =  {triggerTyping, advancedMode};
+		   socketioObj.setSubscriptionParameters("letter", subscriptionParams);
 		   
-		 //Example how to initiate subscription for "sensordata" 
-		 String advanceParams[] =  {"true","true"};//{trigger_typing, advanced_mode}
-		 socketioObj.initiateSubscription("letter", advanceParams);
-		 
-		 //Example how to initiate subscription for "sensordata" 
-		 /*String params[] = {"5"};
-		 socketioObj.initiateSubscription("sensordata", null);
-		 */
-			 
-			 
+		   socketioObj.initiateSubscription();
 
+				 		
 	   }});
   
 
@@ -151,21 +157,18 @@ public class TestSocketActivity extends Activity {
 
    @Override
    public void onClick(View v) {
-	/////SOCKET IO CODE////
+	   	/////SOCKET IO CODE////
 	      
-	   populateLogText("");//to reset log
-	   populateOuputText("");
-	   
-		   String ip = editTextAddress.getText().toString().trim();
-		   String port = editTextPort.getText().toString().trim();
+		   populateLogText("");//to reset log
+		   populateOuputText("");
 		   
-		   
-		   socketioObj.initiateConnection(ip, port, "/sim"); //usewithsimulator
-		   //socketioObj.initiateConnection(ip, port,""); //usewithpen //usewithlocalhost
+			   
+		  
+
+		   socketioObj.initiateConnection(ip, port, targetMode); //usewithsimulator
 		   
 		   Log.i("SocketIotest", "socket URL : " + ip + " : " + port);
 		   
-		   //populateLogText("socket URL : " + ip + " : " + port);
 	       
 	     
 	   
@@ -197,6 +200,7 @@ public class TestSocketActivity extends Activity {
 	 outputTextConcat = "";
 	 
  }
+ 
  public void fetchResponse(ArrayList<String> responseList)
  {
 
@@ -212,15 +216,20 @@ public class TestSocketActivity extends Activity {
  					
  				case "Letter":
 
- 					if(responseList.get(1).equals("Normal"))
+ 					if(responseList.get(1).equals(LetterSubParamsMode.Normal.toString()))
  					{
- 						parserObj.parseLetterParameters(new JSONObject(responseList.get(2)), "Normal"); //socketOutput));
- 						populateOuputText(responseList.get(2));
+						//Normal Mode
+
+ 						parserObj.parseLetterParameters(new JSONObject(responseList.get(3)), LetterSubParamsMode.Normal.toString()); 
+ 						
+ 						populateOuputText(responseList.get(3));
  					}
- 					else if(responseList.get(1).equals("Advanced"))
+ 					else if(responseList.get(1).equals(LetterSubParamsMode.Advanced.toString()))
  					{
- 						parserObj.parseLetterParameters(new JSONObject(responseList.get(2)), "Advanced"); //socketOutput));
- 						populateOuputText(responseList.get(2));
+						//Advanced Mode
+
+ 						parserObj.parseLetterParameters(new JSONObject(responseList.get(3)), "Advanced"); 
+ 						populateOuputText(responseList.get(3));
  					}
  						
  					
@@ -311,9 +320,9 @@ private void populateLogText(String logText)
 
 }
 
-private void populateOuputText(String outputText)
+private void populateOuputText(String outputObj)
 {
-	outputTextConcat = outputTextConcat.concat(outputText + "\n");
+	outputTextConcat = outputTextConcat.concat(outputObj + "\n");
 
 	textOutput.setMovementMethod(new ScrollingMovementMethod());
 	textOutput.setText(outputTextConcat);

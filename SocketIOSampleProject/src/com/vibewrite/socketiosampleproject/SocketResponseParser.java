@@ -23,6 +23,13 @@ public SocketResponseParser()
 
 }
 
+/**
+ * This is to parse respone to "letter" event and extract all variables
+ * 
+ * @param jsonObj
+ * @param mode
+ * @return
+ */
 public Hashtable<String, Object> parseLetterParameters(JSONObject jsonObj, String mode)
 {
 		
